@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -54,7 +55,12 @@ func run() error {
 		}
 	}
 
-	// TODO: get candidate command best similarity and execute
+	// TODO: select command when multiple candidates
+	out, err := exec.Command("git", bests[0].cmd).Output()
+	if err != nil {
+		return fmt.Errorf("failed to execute command: %w", err)
+	}
+	fmt.Println(string(out))
 
 	return nil
 }
