@@ -21,10 +21,11 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(lcmd))
 
-	// TODO: check command args[0] = git
-	// TODO: check command args[1] exists
+	lcmds := bytes.Split(lcmd, []byte(" "))
+	if !bytes.Equal([]byte("git"), lcmds[0]) {
+		return fmt.Errorf("not git command executed just before")
+	}
 
 	// TODO: get LevenshteinDistance between args[1] and git-commands
 
