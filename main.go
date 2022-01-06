@@ -62,8 +62,9 @@ func run() error {
 
 	// https://github.com/git/git/blob/dcc0cd074f0c639a0df20461a301af6d45bd582e/help.c#L538-L539
 	if bestSimilarity > 7 {
-		return nil
+		return fmt.Errorf("no candidate")
 	}
+
 	bests := make([]candidate, n)
 	for i := 0; i < n; i++ {
 		bests[i] = candidates[i]
