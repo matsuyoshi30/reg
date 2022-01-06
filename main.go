@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
+	"strings"
 )
 
 func main() {
@@ -40,22 +42,32 @@ func run() error {
 		}
 	}
 
-	bestSimilarity := candidates[0].len
-	bests := make([]candidate, 0)
-	for _, candidate := range candidates {
-		if bestSimilarity > candidate.len {
-			bestSimilarity = candidate.len
+	sort.Slice(candidates, func(i, j int) bool { return candidates[i].len < candidates[j].len })
+
+	var n int
+	for i, candidate := range candidates {
+		if candidate.len != 0 {
+			break
 		}
+		n = i
+	}
+	n++
+
+	bestSimilarity := candidates[n].len
+	for i := n; i < len(candidates); i++ {
+		if candidates[i].len != bestSimilarity {
+			break
+		}
+		n++
 	}
 
 	// https://github.com/git/git/blob/dcc0cd074f0c639a0df20461a301af6d45bd582e/help.c#L538-L539
 	if bestSimilarity > 7 {
 		return nil
 	}
-	for _, candidate := range candidates {
-		if candidate.len == bestSimilarity {
-			bests = append(bests, candidate)
-		}
+	bests := make([]candidate, n)
+	for i := 0; i < n; i++ {
+		bests[i] = candidates[i]
 	}
 
 	// TODO: select command when multiple candidates
