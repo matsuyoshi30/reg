@@ -34,7 +34,7 @@ func run() error {
 
 	candidates := make([]candidate, len(commands))
 	for i, cmd := range commands {
-		candidates[i] = candidate{cmd: cmd, len: levenshteinDistance([]byte(cmd), lcmds[1])}
+		candidates[i] = candidate{cmd: cmd, len: LevenshteinDistance([]byte(cmd), lcmds[1])}
 	}
 
 	bestSimilarity := candidates[0].len
@@ -150,7 +150,7 @@ type candidate struct {
 
 // TODO: weight
 // https://github.com/git/git/blob/dcc0cd074f0c639a0df20461a301af6d45bd582e/help.c#L606
-func levenshteinDistance(cmd, ecmd []byte) int {
+func LevenshteinDistance(cmd, ecmd []byte) int {
 	l1 := len(cmd)
 	l2 := len(ecmd)
 
