@@ -51,7 +51,6 @@ func run() error {
 		}
 		n = i
 	}
-	n++
 
 	bestSimilarity := candidates[n].len
 	for i := n; i < len(candidates); i++ {
