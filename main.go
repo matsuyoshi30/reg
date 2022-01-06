@@ -34,7 +34,7 @@ func run() error {
 
 	candidates := make([]candidate, len(commands))
 	for i, cmd := range commands {
-		candidates[i] = candidate{cmd: cmd, len: LevenshteinDistance([]byte(cmd), lcmds[1])}
+		candidates[i] = candidate{cmd: cmd, len: DamerauLevenshteinDistance([]byte(cmd), lcmds[1], 0, 2, 1, 3)}
 	}
 
 	bestSimilarity := candidates[0].len
@@ -148,9 +148,14 @@ type candidate struct {
 	len int
 }
 
-// TODO: weight
-// https://github.com/git/git/blob/dcc0cd074f0c639a0df20461a301af6d45bd582e/help.c#L606
-func LevenshteinDistance(cmd, ecmd []byte) int {
+// DamerauLevenshteinDistance calculates Damerau-Levenshtein distance between cmd and ecmd.
+// This implementation allows the costs to be weighted like original git command.
+// - w (as in "sWap")
+// - s (as in "Substitution")
+// - a (for insertion, AKA "Add")
+// - d (as in "Deletion")
+// ref: https://github.com/git/git/blob/dcc0cd074f0c639a0df20461a301af6d45bd582e/help.c#L606
+func DamerauLevenshteinDistance(cmd, ecmd []byte, w, s, a, d int) int {
 	l1 := len(cmd)
 	l2 := len(ecmd)
 
@@ -166,13 +171,29 @@ func LevenshteinDistance(cmd, ecmd []byte) int {
 
 	for i := 1; i <= l1; i++ {
 		for j := 1; j <= l2; j++ {
-			cost := 1
+			cost := s
 			if cmd[i-1] == ecmd[j-1] {
 				cost = 0
 			}
-			dist[i][j] = min(dist[i-1][j-1]+cost, min(dist[i][j-1]+1, dist[i-1][j]+1))
+			dist[i][j] = dist[i-1][j-1] + cost // substitution
+
+			if i > 1 && j > 1 && cmd[i-2] == ecmd[j-1] && cmd[i-1] == ecmd[j-2] {
+				dist[i][j] = min(dist[i][j], dist[i-2][j-2]+w) // swap
+			}
+
+			dist[i][j] = min(dist[i][j], min(dist[i][j-1]+a, dist[i-1][j]+d)) // add and deletion
 		}
 	}
+
+	// for debug
+	// for i := 0; i <= l1; i++ {
+	// 	for j := 0; j < l2; j++ {
+	// 		print(dist[i][j])
+	// 		print(" ")
+	// 	}
+	// 	print(dist[i][l2])
+	// 	println()
+	// }
 
 	return dist[l1][l2]
 }
