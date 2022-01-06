@@ -166,11 +166,11 @@ func levenshteinDistance(cmd, ecmd []byte) int {
 
 	for i := 1; i <= l1; i++ {
 		for j := 1; j <= l2; j++ {
+			cost := 1
 			if cmd[i-1] == ecmd[j-1] {
-				dist[i][j] = min(dist[i-1][j-1], min(dist[i][j-1]+1, dist[i-1][j]+1))
-			} else {
-				dist[i][j] = min(dist[i][j-1]+1, dist[i-1][j]+1)
+				cost = 0
 			}
+			dist[i][j] = min(dist[i-1][j-1]+cost, min(dist[i][j-1]+1, dist[i-1][j]+1))
 		}
 	}
 
