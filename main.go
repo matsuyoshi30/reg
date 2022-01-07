@@ -178,10 +178,10 @@ func DamerauLevenshteinDistance(cmd, ecmd []byte, w, s, a, d int) int {
 	for i := 0; i <= l1; i++ {
 		dist[i] = make([]int, l2+1)
 
-		dist[i][0] = i
+		dist[i][0] = i * d
 	}
 	for j := 0; j <= l2; j++ {
-		dist[0][j] = j
+		dist[0][j] = j * a
 	}
 
 	for i := 1; i <= l1; i++ {
