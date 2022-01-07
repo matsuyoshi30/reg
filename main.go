@@ -51,7 +51,7 @@ func run() error {
 		if candidate.len != 0 {
 			break
 		}
-		n = i
+		n = i + 1
 	}
 
 	bestSimilarity := candidates[n].len
