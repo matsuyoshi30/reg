@@ -146,14 +146,11 @@ func formatZshHistory(line []byte) ([]byte, error) {
 	}
 
 	var ret []byte
-	if i := bytes.IndexByte(line, ';'); i == -1 {
+	i := bytes.IndexByte(line, ';')
+	if i == -1 && i == len(line)-1 {
 		return nil, fmt.Errorf("invalid zsh history format")
-	} else {
-		ret = line[i+1:]
-		if len(ret) == 0 {
-			return nil, fmt.Errorf("invalid zsh history format")
-		}
 	}
+	ret = line[i+1:]
 
 	return ret, nil
 }
