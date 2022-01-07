@@ -120,7 +120,7 @@ func getCommandExecutedJustBefore() ([]byte, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to read history file last line: %w", err)
 		}
-		return formatZshHistory(llb)
+		return ReadZshHistory(llb)
 	}
 
 	return nil, fmt.Errorf("does not support yet")
@@ -163,7 +163,7 @@ func readHistFile(home string) (ll []byte, err error) {
 }
 
 // https://stackoverflow.com/questions/37961165/how-zsh-stores-history-history-file-format
-func formatZshHistory(line []byte) ([]byte, error) {
+func ReadZshHistory(line []byte) ([]byte, error) {
 	if line[0] != ':' {
 		return line, nil
 	}
