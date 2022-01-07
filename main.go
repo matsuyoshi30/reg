@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"math"
 	"os"
@@ -14,14 +15,18 @@ import (
 )
 
 func main() {
-	err := run()
+	var p bool
+	flag.BoolVar(&p, "p", false, "Use prompt when multiple command candidates")
+	flag.Parse()
+
+	err := run(p)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error happened: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func run() error {
+func run(prompt bool) error {
 	// get command executed the most recently
 	lcmd, err := getCommandExecutedJustBefore()
 	if err != nil {
@@ -75,7 +80,7 @@ func run() error {
 	}
 
 	var execcmd string
-	if len(bests) == 1 {
+	if len(bests) == 1 || !prompt {
 		execcmd = bests[0]
 	} else {
 		prompt := promptui.Select{
