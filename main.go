@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/manifoldco/promptui"
 )
 
 func main() {
@@ -67,13 +69,27 @@ func run() error {
 		return fmt.Errorf("no candidate")
 	}
 
-	bests := make([]candidate, n)
+	bests := make([]string, n)
 	for i := 0; i < n; i++ {
-		bests[i] = candidates[i]
+		bests[i] = candidates[i].cmd
 	}
 
-	// TODO: select command when multiple candidates
-	out, err := exec.Command("git", bests[0].cmd).Output()
+	var execcmd string
+	if len(bests) == 1 {
+		execcmd = bests[0]
+	} else {
+		prompt := promptui.Select{
+			Label: "Select git command you want to execute",
+			Items: bests,
+		}
+		_, result, err := prompt.Run()
+		if err != nil {
+			return fmt.Errorf("promptui failed: %w", err)
+		}
+		execcmd = result
+	}
+
+	out, err := exec.Command("git", execcmd).Output()
 	if err != nil {
 		return fmt.Errorf("failed to execute command: %w", err)
 	}
