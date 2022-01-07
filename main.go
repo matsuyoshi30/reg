@@ -36,9 +36,11 @@ func run() error {
 
 	candidates := make([]candidate, len(commands))
 	for i, cmd := range commands {
-		candidates[i] = candidate{cmd: cmd, len: DamerauLevenshteinDistance(lcmds[1], []byte(cmd), 0, 2, 1, 3)}
+		candidates[i] = candidate{cmd: cmd}
 		if strings.HasPrefix(cmd, string(lcmds[1])) {
 			candidates[i].len = 0
+		} else {
+			candidates[i].len = DamerauLevenshteinDistance(lcmds[1], []byte(cmd), 0, 2, 1, 3)
 		}
 	}
 
