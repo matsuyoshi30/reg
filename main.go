@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -162,20 +163,27 @@ func readHistFile(home string) (ll []byte, err error) {
 	return ll, nil
 }
 
+var zshExtHistExp = regexp.MustCompile(`^: \d{1,}:\d{1,};(.*)`)
+
+// ReadZshHistory reads zsh history line. It also reads EXTENDED_HISTORY format.
+// : <beginning time>:<elapsed seconds>;<command>
+//
 // https://stackoverflow.com/questions/37961165/how-zsh-stores-history-history-file-format
 func ReadZshHistory(line []byte) ([]byte, error) {
+	if len(line) == 0 {
+		return nil, nil
+	}
+
 	if line[0] != ':' {
 		return line, nil
 	}
 
-	var ret []byte
-	i := bytes.IndexByte(line, ';')
-	if i == -1 && i == len(line)-1 {
-		return nil, fmt.Errorf("invalid zsh history format")
+	matches := zshExtHistExp.FindSubmatch(line)
+	if len(matches) == 0 || len(matches[1]) == 0 {
+		return nil, fmt.Errorf("invalid zsh history")
 	}
-	ret = line[i+1:]
 
-	return ret, nil
+	return matches[1], nil
 }
 
 type candidate struct {
