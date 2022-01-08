@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"os/exec"
@@ -99,12 +100,43 @@ func run(prompt bool) error {
 	for _, c := range lcmds[2:] {
 		args = append(args, string(c))
 	}
+	execcmd := exec.Command("git", args...)
 
-	out, err := exec.Command("git", args...).Output()
+	stdout, err := execcmd.StdoutPipe()
 	if err != nil {
-		return fmt.Errorf("failed to execute command: %w", err)
+		return fmt.Errorf("stdoutpipe error: %w", err)
 	}
-	fmt.Println(string(out))
+
+	stderr, err := execcmd.StderrPipe()
+	if err != nil {
+		return fmt.Errorf("stderrpipe error: %w", err)
+	}
+
+	if err := execcmd.Start(); err != nil {
+		return fmt.Errorf("failed to start command: %w", err)
+	}
+
+	sout, err := io.ReadAll(stdout)
+	if err != nil {
+		return fmt.Errorf("failed to read stdout: %w", err)
+	}
+	if len(sout) > 0 {
+		fmt.Println(string(sout))
+		return nil
+	}
+
+	serr, err := io.ReadAll(stderr)
+	if err != nil {
+		return fmt.Errorf("failed to read stderr: %w", err)
+	}
+	if len(serr) > 0 {
+		fmt.Println(string(serr))
+		return nil
+	}
+
+	if err := execcmd.Wait(); err != nil {
+		return fmt.Errorf("failed to wait command: %w", err)
+	}
 
 	return nil
 }
