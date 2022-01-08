@@ -154,7 +154,7 @@ func getCommandExecutedJustBefore() ([]byte, error) {
 	}
 
 	if shell == "/bin/zsh" {
-		llb, err := readHistFile(home)
+		llb, err := readHistFile(home, ".zsh_history")
 		if err != nil {
 			return nil, fmt.Errorf("failed to read history file last line: %w", err)
 		}
@@ -164,8 +164,8 @@ func getCommandExecutedJustBefore() ([]byte, error) {
 	return nil, fmt.Errorf("does not support yet")
 }
 
-func readHistFile(home string) (ll []byte, err error) {
-	f, err := os.Open(filepath.Join(home, ".zsh_history"))
+func readHistFile(homedir, histFile string) (ll []byte, err error) {
+	f, err := os.Open(filepath.Join(homedir, histFile))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get history file: %w", err)
 	}
@@ -173,7 +173,7 @@ func readHistFile(home string) (ll []byte, err error) {
 		err = f.Close()
 	}()
 
-	stat, err := os.Stat(filepath.Join(home, ".zsh_history"))
+	stat, err := os.Stat(filepath.Join(homedir, histFile))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get history file stat: %w", err)
 	}
