@@ -80,9 +80,9 @@ func run(prompt bool) error {
 		bests[i] = candidates[i].cmd
 	}
 
-	var execcmd string
+	var subc string
 	if len(bests) == 1 || !prompt {
-		execcmd = bests[0]
+		subc = bests[0]
 	} else {
 		prompt := promptui.Select{
 			Label: "Select git command you want to execute",
@@ -92,10 +92,10 @@ func run(prompt bool) error {
 		if err != nil {
 			return fmt.Errorf("promptui failed: %w", err)
 		}
-		execcmd = result
+		subc = result
 	}
 
-	args := []string{execcmd}
+	args := []string{subc}
 	for _, c := range lcmds[2:] {
 		args = append(args, string(c))
 	}
