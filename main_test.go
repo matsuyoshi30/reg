@@ -2,8 +2,85 @@ package main
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"testing"
 )
+
+func TestReadHistFile(t *testing.T) {
+	tmpdir := t.TempDir()
+
+	tests := []struct {
+		desc     string
+		hContent string
+		noFile   bool
+		want     []byte
+		isErr    bool
+	}{
+		{
+			desc: "empty",
+		},
+		{
+			desc: "normal",
+			hContent: `git statu
+reg
+`,
+			want: []byte("git statu"),
+		},
+		{
+			desc: "one line history",
+			hContent: `reg
+`,
+		},
+		{
+			desc: "no file",
+			hContent: `git statu
+reg
+`,
+			noFile: true,
+			isErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			var (
+				hf  *os.File
+				err error
+			)
+			if !tt.noFile {
+				hf, err = os.Create(filepath.Join(tmpdir, tt.desc))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				_, err = hf.Write([]byte(tt.hContent))
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if err := hf.Close(); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			actual, err := ReadHistFile(tmpdir, tt.desc)
+			if tt.isErr {
+				if err == nil {
+					t.Errorf("want error but got nil\n")
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("want no error but got %v\n", err)
+				return
+			}
+			if !bytes.Equal(tt.want, actual) {
+				t.Errorf("want '%v' but got '%v'\n", string(tt.want), string(actual))
+			}
+		})
+	}
+}
 
 func TestReadZshHistory(t *testing.T) {
 	tests := []struct {

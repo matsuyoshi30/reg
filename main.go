@@ -154,7 +154,7 @@ func getCommandExecutedJustBefore() ([]byte, error) {
 	}
 
 	if shell == "/bin/zsh" {
-		llb, err := readHistFile(home, ".zsh_history")
+		llb, err := ReadHistFile(home, ".zsh_history")
 		if err != nil {
 			return nil, fmt.Errorf("failed to read history file last line: %w", err)
 		}
@@ -164,7 +164,8 @@ func getCommandExecutedJustBefore() ([]byte, error) {
 	return nil, fmt.Errorf("does not support yet")
 }
 
-func readHistFile(homedir, histFile string) (ll []byte, err error) {
+// ReadHistFile reads history file and returns second line from the end.
+func ReadHistFile(homedir, histFile string) (ll []byte, err error) {
 	f, err := os.Open(filepath.Join(homedir, histFile))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get history file: %w", err)
@@ -178,10 +179,19 @@ func readHistFile(homedir, histFile string) (ll []byte, err error) {
 		return nil, fmt.Errorf("failed to get history file stat: %w", err)
 	}
 
-	buf := make([]byte, 256)
-	start := stat.Size() - int64(len(buf))
+	var (
+		start int64
+		buf   []byte
+	)
+	if stat.Size() > 256 {
+		start = stat.Size() - 256
+		buf = make([]byte, 256)
+	} else {
+		start = 0
+		buf = make([]byte, stat.Size())
+	}
 	_, err = f.ReadAt(buf, start)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
 
@@ -195,6 +205,9 @@ func readHistFile(homedir, histFile string) (ll []byte, err error) {
 			ll = buf[i+1 : isLast]
 			break
 		}
+	}
+	if len(ll) == 0 {
+		ll = buf[0:isLast]
 	}
 
 	return ll, nil
