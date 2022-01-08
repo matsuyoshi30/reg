@@ -95,7 +95,12 @@ func run(prompt bool) error {
 		execcmd = result
 	}
 
-	out, err := exec.Command("git", execcmd).Output()
+	args := []string{execcmd}
+	for _, c := range lcmds[2:] {
+		args = append(args, string(c))
+	}
+
+	out, err := exec.Command("git", args...).Output()
 	if err != nil {
 		return fmt.Errorf("failed to execute command: %w", err)
 	}
