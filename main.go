@@ -121,7 +121,7 @@ func run(prompt bool) error {
 		return fmt.Errorf("failed to read stdout: %w", err)
 	}
 	if len(sout) > 0 {
-		fmt.Println(string(sout))
+		fmt.Print(string(sout))
 		return nil
 	}
 
@@ -130,7 +130,7 @@ func run(prompt bool) error {
 		return fmt.Errorf("failed to read stderr: %w", err)
 	}
 	if len(serr) > 0 {
-		fmt.Println(string(serr))
+		fmt.Print(string(serr))
 		return nil
 	}
 
