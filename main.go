@@ -101,31 +101,10 @@ func run(prompt bool) error {
 		args = append(args, string(c))
 	}
 	execcmd := exec.Command("git", args...)
+	execcmd.Stdout = os.Stdout
+	execcmd.Stderr = os.Stderr
 
-	stdout, err := execcmd.StdoutPipe()
-	if err != nil {
-		return fmt.Errorf("stdoutpipe error: %w", err)
-	}
-
-	stderr, err := execcmd.StderrPipe()
-	if err != nil {
-		return fmt.Errorf("stderrpipe error: %w", err)
-	}
-
-	if err := execcmd.Start(); err != nil {
-		return fmt.Errorf("failed to start command: %w", err)
-	}
-
-	_, err = io.Copy(os.Stdout, stdout)
-	if err != nil {
-		return fmt.Errorf("failed to copy stdout: %w", err)
-	}
-	_, err = io.Copy(os.Stderr, stderr)
-	if err != nil {
-		return fmt.Errorf("failed to copy stderr: %w", err)
-	}
-
-	if err := execcmd.Wait(); err != nil {
+	if err := execcmd.Run(); err != nil {
 		return fmt.Errorf("failed to wait command: %w", err)
 	}
 
