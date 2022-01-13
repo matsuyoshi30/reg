@@ -116,22 +116,13 @@ func run(prompt bool) error {
 		return fmt.Errorf("failed to start command: %w", err)
 	}
 
-	sout, err := io.ReadAll(stdout)
+	_, err = io.Copy(os.Stdout, stdout)
 	if err != nil {
-		return fmt.Errorf("failed to read stdout: %w", err)
+		return fmt.Errorf("failed to copy stdout: %w", err)
 	}
-	if len(sout) > 0 {
-		fmt.Print(string(sout))
-		return nil
-	}
-
-	serr, err := io.ReadAll(stderr)
+	_, err = io.Copy(os.Stderr, stderr)
 	if err != nil {
-		return fmt.Errorf("failed to read stderr: %w", err)
-	}
-	if len(serr) > 0 {
-		fmt.Print(string(serr))
-		return nil
+		return fmt.Errorf("failed to copy stderr: %w", err)
 	}
 
 	if err := execcmd.Wait(); err != nil {
